@@ -21,9 +21,8 @@ import re
 import logging
 from shutil import copyfile
 from typing import List, Optional, Tuple
-
 from .tokenization_utils import PreTrainedTokenizer
-
+from pyvi import ViTokenizer
 
 
 logger = logging.getLogger(__name__)
@@ -130,6 +129,7 @@ class PhobertTokenizer(PreTrainedTokenizer):
         unk_token="<unk>",
         pad_token="<pad>",
         mask_token="<mask>",
+        words_segment=False,
         **kwargs,
     ):
         self.vocab_file = vocab_file
@@ -151,6 +151,8 @@ class PhobertTokenizer(PreTrainedTokenizer):
 
         self.bpe_ranks = dict(zip(merges, range(len(merges))))
         self.cache = {}
+
+        self.words_segment = words_segment
 
         super().__init__(
             bos_token=bos_token,
@@ -296,6 +298,7 @@ class PhobertTokenizer(PreTrainedTokenizer):
         """Tokenize a string."""
         split_tokens = []
 
+        text = ViTokenizer.tokenize(text) if self.words_segment else text
         words = re.findall(r"\S+\n?", text)
 
         for token in words:
